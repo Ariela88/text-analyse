@@ -1,39 +1,64 @@
 const fs = require("fs");
+
 const inputUrl = process.argv[2];
 
-let outputUrl = process.argv[3];
+function createReportCopy(filePath) {
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Errore durante la lettura del file', err);
+            return;
+        }
 
+        const reportFilePath = filePath.replace('.txt', '_report.txt');
 
+        fs.writeFile(reportFilePath, data, (err) => {
+            if (err) {
+                console.error('Errore durante la scrittura del file', err);
+                return;
+            }
 
-let data = readFile(inputUrl)
+            console.log('Copia con report creata con successo');
 
-if (data) {
-
-   const report = inputUrl + 'report';
-
-   console.log(report)
-
-    writeData(outputUrl,report);
+            const dataArray = data.split(' ');
+            console.log('Numero di parole:', countWord(dataArray));
+            console.log('Numero di caratteri:', countChar(dataArray));
+            console.log('Parola più usata:', findmostUsedWord(dataArray));
+        });
+    });
 }
 
-function readFile(url){
-    try {
-        const data = fs.readFileSync(url, "utf8");
-        return data;
-    } catch (err) {
-        console.error(err.message);
-        return null;
+if (!inputUrl) {
+    console.error('Per favore, digita il percorso corretto.');
+} else {
+    createReportCopy(inputUrl);
+}
+
+function countChar(dataArray) {
+    const countCharsString = dataArray.join('').length;
+    return countCharsString;
+}
+
+function countWord(dataArray) {
+    return dataArray.length;
+}
+
+function findmostUsedWord(wordsArray) {
+    const wordFrequencyMap = {};
+
+    for (const word of wordsArray) {
+        wordFrequencyMap[word] = (wordFrequencyMap[word] || 0) + 1;
     }
-}
+
+    let mostUsedWord = '';
+    let highestFrequency = 0;
 
 
-
-
-function writeData(url, data){
-    try {
-        fs.writeFileSync(url, data);
-    } catch (err) {
-        console.error(err.message);
+    for (const word in wordFrequencyMap) {
+        if (wordFrequencyMap[word] > highestFrequency) {
+            mostUsedWord = word;
+            highestFrequency = wordFrequencyMap[word];
+        }
     }
-}
 
+    return mostUsedWord;
+}
